@@ -1,0 +1,5 @@
+FileVersion = 1
+Projects = {Dxc-Beef = {Path = "."}}
+
+[Workspace]
+StartupProject = "Dxc-Beef"

@@ -1,0 +1,6 @@
+FileVersion = 1
+
+[Project]
+Name = "Dxc-Beef"
+TargetType = "BeefLib"
+StartupObject = "Dxc_Beef.Program"
