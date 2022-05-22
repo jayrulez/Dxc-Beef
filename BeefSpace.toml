@@ -1,5 +1,5 @@
 FileVersion = 1
-Projects = {Dxc-Beef = {Path = "."}}
+Projects = {Dxc-Beef = {Path = "./Dxc-Beef"}, "Dxc-Beef.Test" = {Path = "Dxc-Beef.Test"}}
 
 [Workspace]
-StartupProject = "Dxc-Beef"
+StartupProject = "Dxc-Beef.Test"
