@@ -7,7 +7,7 @@ namespace Dxc_Beef
 
 		public struct VTable : Windows.COM_IUnknown.VTable
 		{
-			public function [CallingConvention(.Stdcall)] void(IDxcBlob* self) GetBufferPointer;
+			public function [CallingConvention(.Stdcall)] void*(IDxcBlob* self) GetBufferPointer;
 			public function [CallingConvention(.Stdcall)] int(IDxcBlob* self) GetBufferSize;
 		}
 

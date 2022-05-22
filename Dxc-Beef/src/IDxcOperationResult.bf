@@ -7,7 +7,7 @@ namespace Dxc_Beef
 
 		public struct VTable : Windows.COM_IUnknown.VTable
 		{
-			public function [CallingConvention(.Stdcall)] HResult(IDxcOperationResult * self, out HResult* pStatus) GetStatus;
+			public function [CallingConvention(.Stdcall)] HResult(IDxcOperationResult * self, out HResult pStatus) GetStatus;
 
 			// GetResult returns the main result of the operation.
 			// This corresponds to:

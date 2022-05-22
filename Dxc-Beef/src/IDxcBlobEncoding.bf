@@ -7,7 +7,7 @@ namespace Dxc_Beef
 
 		public struct VTable : IDxcBlob.VTable
 		{
-			public function [CallingConvention(.Stdcall)] void(IDxcBlobEncoding* self, out bool* pKnown, out uint32 pCodePage) GetEncoding;
+			public function [CallingConvention(.Stdcall)] HResult(IDxcBlobEncoding* self, out bool* pKnown, out uint32 pCodePage) GetEncoding;
 		}
 
 		public new VTable* VT
