@@ -6,18 +6,47 @@ namespace Dxc_Beef.Test
 	{
 		public static void Main(String[] args)
 		{
-			/*void* dxc = null;
+			IDxcUtils* dxcUtils = null;
+			var result = Dxc.CreateInstance(out dxcUtils);
+			if(result != .OK)
+				return;
+			uint32 codePage = 0;
 
-			Dxc.DxcCreateInstance(ref CLSID_DxcCompiler, ref IDxcCompiler3.sIID, out dxc);
+			IDxcBlobEncoding* pBlob = null;
 
-			IDxcCompiler3* compiler = (.)(void*)dxc;
-			*/
+			var fileName = scope String("shader-binary.dxil").ToScopedNativeWChar!();
+			//var fileName = scope String("shader.hlsl").ToScopedNativeWChar!();
 
-			void* compilerArgsPtr = null;
+			result = dxcUtils.VT.LoadFile(dxcUtils, fileName, &codePage, out pBlob);
+			if(result != .OK)
+				return;
 
-			Dxc.DxcCreateInstance(ref IDxcCompilerArgs.sCLSID, ref IDxcCompilerArgs.sIID, out compilerArgsPtr);
+			Console.WriteLine($"File size: {pBlob.VT.GetBufferSize(pBlob)}");
 
-			IDxcCompilerArgs* compilerArgs = (IDxcCompilerArgs*)(void*)compilerArgsPtr;
+			IDxcContainerReflection* container = null;
+			result = Dxc.CreateInstance(out container);
+			if(result != .OK)
+				return;
+
+			result = container.VT.Load(container, pBlob);
+			if(result != .OK)
+				return;
+
+			result = container.VT.GetPartCount(container, let pPartCount);
+			if(result != .OK)
+				return;
+
+			uint32 partCount = pPartCount;
+
+			for(int i = 0; i < partCount; i++)
+			{
+				result = container.VT.GetPartKind(container, (.)i, var pPartKind);
+				Console.WriteLine($"Part kind: {pPartKind}");
+			}
+
+			IDxcCompilerArgs* compilerArgs = null;
+
+			Dxc.CreateInstance(out compilerArgs);
 
 			Console.WriteLine(compilerArgs.VT.GetCount(compilerArgs));
 
@@ -33,6 +62,39 @@ namespace Dxc_Beef.Test
 			for(int i = 0; i < count; i++){
 				Console.WriteLine($"{scope String(v[i])}");
 			}
+
+			IDxcPdbUtils* pdbUtils = null;
+
+			Dxc.CreateInstance(out pdbUtils);
+
+			result = pdbUtils.VT.Load(pdbUtils, pBlob);
+			if(result != .OK)
+				return;
+
+			/*
+			IDxcResult* compileResult = null;
+
+			result = pdbUtils.VT.CompileForFullPDB(pdbUtils, out compileResult);
+			if(result != .OK)
+				return;*/
+
+			result = pdbUtils.VT.GetSourceCount(pdbUtils, var pSourceCount);
+			if(result != .OK)
+				return;
+
+			result = pdbUtils.VT.GetArgCount(pdbUtils, var pArgCount);
+			if(result != .OK)
+				return;
+
+			result = pdbUtils.VT.GetName(pdbUtils, var name);
+			if(result != .OK)
+				return;
+
+			IDxcBlob* fullPdbBlob = null;
+
+			result = pdbUtils.VT.GetFullPDB(pdbUtils, out fullPdbBlob);
+			if(result != .OK)
+				return;
 
 			Console.Read();
 		}
