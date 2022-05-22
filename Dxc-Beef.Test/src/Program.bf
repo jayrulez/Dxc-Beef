@@ -1,6 +1,7 @@
 using System;
 using Dxc_Beef;
 using System.Collections;
+using System.Diagnostics;
 namespace Dxc_Beef.Test
 {
 	class Program
@@ -114,33 +115,39 @@ namespace Dxc_Beef.Test
 			if (result != .OK)
 				return;
 
-			char16* pTarget = scope String("ps_6_0").ToScopedNativeWChar!();
-			char16* pEntryPoint = scope String("PSMain").ToScopedNativeWChar!();
-
 			List<char16*> arguments = scope .();
-			Queue<char16*> dynamicArguments = scope .();
-			arguments.Add(scope String("/Zi").ToScopedNativeWChar!());
-			arguments.Add(scope String("/Qembed_debug").ToScopedNativeWChar!());
-			uint32 space = 0;
 
-			/*if(){
+			arguments.Add(scope String("-E").ToScopedNativeWChar!());
+			arguments.Add(scope String("PSMain").ToScopedNativeWChar!());
+			
+			arguments.Add(scope String("-T").ToScopedNativeWChar!());
+			arguments.Add(scope String("ps_6_2").ToScopedNativeWChar!());
 
-			}*/
+			arguments.Add(scope String("-Qstrip_debug").ToScopedNativeWChar!());
+			arguments.Add(scope String("-Qstrip_reflect").ToScopedNativeWChar!());
 
-			arguments.Add(scope String("-auto-binding-space").ToScopedNativeWChar!());
-			dynamicArguments.Add(scope String(space.ToString(.. scope .())).ToScopedNativeWChar!());
-			arguments.AddRange(dynamicArguments);
+			arguments.Add(DXC_ARG_WARNINGS_ARE_ERRORS.ToScopedNativeWChar!());
+			arguments.Add(DXC_ARG_DEBUG.ToScopedNativeWChar!());
+			arguments.Add(DXC_ARG_PACK_MATRIX_ROW_MAJOR.ToScopedNativeWChar!());
 
-			IDxcOperationResult* pResult = null;
-			IDxcCompiler* pCompiler = null;
+			IDxcCompiler3* pCompiler = null;
 
 			result = Dxc.CreateInstance(out pCompiler);
 			if (result != .OK)
 				return;
 
-			result = pCompiler.VT.Compile(pCompiler, pSource, scope String("shader.hlsl").ToScopedNativeWChar!(), pEntryPoint, pTarget, arguments.Ptr, (.)arguments.Count, null, 0, null, out pResult);
+			DxcBuffer buffer = .()
+			{
+				Ptr = pSource.VT.GetBufferPointer(pSource),
+				Size = pSource.VT.GetBufferSize(pSource),
+				Encoding = 0
+			};
+
+			result = pCompiler.VT.Compile(pCompiler, &buffer, arguments.Ptr, (.)arguments.Count, null, ref IDxcResult.sIID, var ppResult);
 			if (result != .OK)
 				return;
+			
+			IDxcResult* pResult = (.)ppResult;
 
 			result = pResult.VT.GetStatus(pResult, var status);
 
@@ -150,7 +157,7 @@ namespace Dxc_Beef.Test
 				result = pResult.VT.GetErrorBuffer(pResult, out pErrors);
 				if (pErrors != null && pErrors.VT.GetBufferSize(pErrors) > 0)
 				{
-					Console.WriteLine(scope String((char8*)pErrors.VT.GetBufferPointer(pErrors)));
+					Debug.WriteLine(scope String((char8*)pErrors.VT.GetBufferPointer(pErrors)));
 				}
 				return;
 			}
