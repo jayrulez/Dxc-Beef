@@ -1,3 +1,5 @@
+#include "include.h"
+
 struct PSInput
 {
 	float4 color : COLOR;

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 namespace Dxc_Beef
 {
 	public struct IDxcIncludeHandler  : Windows.COM_IUnknown

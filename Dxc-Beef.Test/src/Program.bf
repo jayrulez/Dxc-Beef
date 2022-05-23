@@ -2,6 +2,7 @@ using System;
 using Dxc_Beef;
 using System.Collections;
 using System.Diagnostics;
+using System.IO;
 namespace Dxc_Beef.Test
 {
 	class Program
@@ -119,7 +120,7 @@ namespace Dxc_Beef.Test
 
 			arguments.Add(scope String("-E").ToScopedNativeWChar!());
 			arguments.Add(scope String("PSMain").ToScopedNativeWChar!());
-			
+
 			arguments.Add(scope String("-T").ToScopedNativeWChar!());
 			arguments.Add(scope String("ps_6_2").ToScopedNativeWChar!());
 
@@ -137,16 +138,18 @@ namespace Dxc_Beef.Test
 				return;
 
 			DxcBuffer buffer = .()
-			{
-				Ptr = pSource.VT.GetBufferPointer(pSource),
-				Size = pSource.VT.GetBufferSize(pSource),
-				Encoding = 0
-			};
+				{
+					Ptr = pSource.VT.GetBufferPointer(pSource),
+					Size = pSource.VT.GetBufferSize(pSource),
+					Encoding = 0
+				};
 
-			result = pCompiler.VT.Compile(pCompiler, &buffer, arguments.Ptr, (.)arguments.Count, null, ref IDxcResult.sIID, var ppResult);
+			MyIncludeHandler includeHandler = .(pLibrary, Directory.GetCurrentDirectory(.. scope String()));
+
+			result = pCompiler.VT.Compile(pCompiler, &buffer, arguments.Ptr, (.)arguments.Count, &includeHandler, ref IDxcResult.sIID, var ppResult);
 			if (result != .OK)
 				return;
-			
+
 			IDxcResult* pResult = (.)ppResult;
 
 			result = pResult.VT.GetStatus(pResult, var status);
@@ -164,5 +167,76 @@ namespace Dxc_Beef.Test
 
 			Console.Read();
 		}
+	}
+
+	public struct MyIncludeHandler : IDxcIncludeHandler
+	{
+		public struct VTable : Windows.COM_IUnknown.VTable
+		{
+			public function [CallingConvention(.Stdcall)] HResult(MyIncludeHandler* this, char16* pFilename, out IDxcBlob* ppIncludeSource) LoadSource;
+		}
+
+		public this(IDxcLibrary* pLibrary, in String basePath)
+		{
+			m_pLibrary = pLibrary;
+			m_BasePath = basePath;
+
+			function [CallingConvention(.Stdcall)] HResult(MyIncludeHandler* this, ref Guid riid, void** result) queryInterface = => QueryInterface;
+			function [CallingConvention(.Stdcall)] uint32(MyIncludeHandler* this) addRef = => AddRef;
+			function [CallingConvention(.Stdcall)] uint32(MyIncludeHandler* this) release = => Release;
+
+			mDVT = .();
+			mDVT.QueryInterface = (.)(void*)queryInterface;
+			mDVT.AddRef = (.)(void*)addRef;
+			mDVT.Release = (.)(void*)release;
+			mDVT.LoadSource = => LoadSource;
+
+			mVT = &mDVT;
+		}
+
+		private HResult LoadSource(char16* pFilename, out IDxcBlob* ppIncludeSource)
+		{
+			IDxcBlobEncoding* pSource = null;
+
+			String path = scope String(m_BasePath);
+			path.AppendF("{0}{1}", Path.DirectorySeparatorChar, scope String(pFilename));
+
+			HResult result = m_pLibrary.VT.CreateBlobFromFile(m_pLibrary, path.ToScopedNativeWChar!(), null, out pSource);
+
+			if (result == .OK && pSource != null)
+				ppIncludeSource = pSource;
+			else
+				ppIncludeSource = ?;
+
+			return result;
+		}
+
+		private HResult QueryInterface(ref Guid riid, void** result)
+		{
+			return (.)0x80004001;
+		}
+
+		private uint32 AddRef()
+		{
+			return (.)0x80004001;
+		}
+
+		private uint32 Release()
+		{
+			return (.)0x80004001;
+		}
+
+
+		public new VTable* VT
+		{
+			get
+			{
+				return (.)mVT;
+			}
+		}
+
+		private VTable mDVT;
+		private IDxcLibrary* m_pLibrary = null;
+		private String m_BasePath = null;
 	}
 }
