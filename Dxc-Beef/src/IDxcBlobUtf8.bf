@@ -11,12 +11,22 @@ namespace Dxc_Beef
 			public function [CallingConvention(.Stdcall)] int(IDxcBlobUtf8* self) GetStringLength;
 		}
 
-		public new VTable* VT
+		private new VTable* VT
 		{
 			get
 			{
 				return (.)mVT;
 			}
+		}
+
+		public char8* GetStringPointer() mut
+		{
+			return VT.GetStringPointer(&this);
+		}
+
+		public int GetStringLength() mut
+		{
+			return VT.GetStringLength(&this);
 		}
 	}
 }

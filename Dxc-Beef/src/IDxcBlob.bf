@@ -11,12 +11,22 @@ namespace Dxc_Beef
 			public function [CallingConvention(.Stdcall)] int(IDxcBlob* self) GetBufferSize;
 		}
 
-		public new VTable* VT
+		private new VTable* VT
 		{
 			get
 			{
 				return (.)mVT;
 			}
+		}
+
+		public void* GetBufferPointer() mut
+		{
+			return VT.GetBufferPointer(&this);
+		}
+
+		public int GetBufferSize() mut
+		{
+			return VT.GetBufferSize(&this);
 		}
 	}
 }

@@ -22,12 +22,42 @@ namespace Dxc_Beef
 			public function [CallingConvention(.Stdcall)] DXC_OUT_KIND(IDxcResult * self) PrimaryOutput;
 		}
 
-		public new VTable* VT
+		private new VTable* VT
 		{
 			get
 			{
 				return (.)mVT;
 			}
+		}
+		
+
+		public bool HasOutput(DXC_OUT_KIND dxcOutKin) mut
+		{
+			return VT.HasOutput(&this, dxcOutKin);
+		}
+
+		public HResult GetOutput(
+			DXC_OUT_KIND dxcOutKind,
+			ref Guid iid,
+			out void **ppvObject,
+			out IDxcBlobWide *ppOutputName) mut
+		{
+			return VT.GetOutput(&this, dxcOutKind, ref iid, out ppvObject, out ppOutputName);
+		}
+
+		public uint32 GetNumOutputs() mut
+		{
+			return VT.GetNumOutputs(&this);
+		}
+
+		public DXC_OUT_KIND GetOutputByIndex(uint32 index) mut
+		{
+			return VT.GetOutputByIndex(&this, index);
+		}
+
+		public DXC_OUT_KIND PrimaryOutput() mut
+		{
+			return VT.PrimaryOutput(&this);
 		}
 	}
 }

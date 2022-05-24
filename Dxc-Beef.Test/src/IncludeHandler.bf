@@ -27,8 +27,7 @@ namespace Dxc_Beef.Test
 		{
 			IDxcBlobEncoding* pSource = null;
 
-			String path = scope String(m_BasePath);
-			path.AppendF("{0}{1}", Path.DirectorySeparatorChar, scope String(pFilename));
+			String path = Path.InternalCombine(.. scope .(), m_BasePath, scope String(pFilename));
 
 			HResult result = m_pLibrary.VT.CreateBlobFromFile(m_pLibrary, path.ToScopedNativeWChar!(), null, out pSource);
 

@@ -21,12 +21,27 @@ namespace Dxc_Beef
 			public function [CallingConvention(.Stdcall)] HResult(IDxcOperationResult * self, out IDxcBlobEncoding *ppErrors) GetErrorBuffer;
 		}
 
-		public new VTable* VT
+		private new VTable* VT
 		{
 			get
 			{
 				return (.)mVT;
 			}
+		}
+
+		public HResult GetStatus(out HResult pStatus) mut
+		{
+			return VT.GetStatus(&this, out pStatus);
+		}
+
+		public HResult GetResult(out IDxcBlob *ppResult) mut
+		{
+			return VT.GetResult(&this, out ppResult);
+		}
+
+		public HResult GetErrorBuffer(out IDxcBlobEncoding *ppErrors) mut
+		{
+			return VT.GetErrorBuffer(&this, out ppErrors);
 		}
 	}
 }

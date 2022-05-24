@@ -10,12 +10,16 @@ namespace Dxc_Beef
 			public function [CallingConvention(.Stdcall)] HResult(IDxcBlobEncoding* self, out bool* pKnown, out uint32 pCodePage) GetEncoding;
 		}
 
-		public new VTable* VT
+		private new VTable* VT
 		{
 			get
 			{
 				return (.)mVT;
 			}
+		}
+
+		public HResult GetEncoding(out bool* pKnown, out uint32 pCodePage) mut {
+			return VT.GetEncoding(&this, out pKnown, out pCodePage);
 		}
 	}
 }

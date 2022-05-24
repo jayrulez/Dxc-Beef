@@ -8,23 +8,22 @@ namespace Dxc_Beef
 
 		public struct VTable : COM_Resource.VTable
 		{
-			
 			// Compile a single entry point to the target shader model,
 			// Compile a library to a library target (-T lib_*),
 			// Compile a root signature (-T rootsig_*), or
 			// Preprocess HLSL source (-P)
-			public function [CallingConvention(.Stdcall)] HResult(IDxcCompiler3 * self,
-				DxcBuffer *pSource,                // Source text to compile
-			    char16* *pArguments, // Array of pointers to arguments
-			    uint32 argCount,                         // Number of arguments
-			    IDxcIncludeHandler *pIncludeHandler, // user-provided interface to handle #include directives (optional)
-			    ref Guid riid, out void**ppResult      // IDxcResult: status, buffer, and errors
+			public function [CallingConvention(.Stdcall)] HResult(IDxcCompiler3* self,
+				DxcBuffer* pSource, // Source text to compile
+				char16** pArguments, // Array of pointers to arguments
+				uint32 argCount, // Number of arguments
+				IDxcIncludeHandler* pIncludeHandler, // user-provided interface to handle #include directives (optional)
+				ref Guid riid, out void** ppResult // IDxcResult: status, buffer, and errors
 				) Compile;
 
 			// Disassemble a program.
-			public function [CallingConvention(.Stdcall)] HResult(IDxcCompiler3 * self,
-				DxcBuffer *pObject,                // Program to disassemble: dxil container or bitcode.
-				ref Guid riid, out void**ppResult      // IDxcResult: status, disassembly text, and errors
+			public function [CallingConvention(.Stdcall)] HResult(IDxcCompiler3* self,
+				DxcBuffer* pObject, // Program to disassemble: dxil container or bitcode.
+				ref Guid riid, out void** ppResult // IDxcResult: status, disassembly text, and errors
 				) Disassemble;
 		}
 

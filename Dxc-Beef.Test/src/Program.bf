@@ -7,100 +7,6 @@ namespace Dxc_Beef.Test
 {
 	class Program
 	{
-		public static void Test1()
-		{
-			IDxcUtils* dxcUtils = null;
-			var result = Dxc.CreateInstance(out dxcUtils);
-			if (result != .OK)
-				return;
-			uint32 codePage = 0;
-
-			IDxcBlobEncoding* pBlob = null;
-
-			var fileName = scope String("shader-binary.dxil").ToScopedNativeWChar!();
-			//var fileName = scope String("shader.hlsl").ToScopedNativeWChar!();
-
-			result = dxcUtils.VT.LoadFile(dxcUtils, fileName, &codePage, out pBlob);
-			if (result != .OK)
-				return;
-
-			Console.WriteLine($"File size: {pBlob.VT.GetBufferSize(pBlob)}");
-
-			IDxcContainerReflection* container = null;
-			result = Dxc.CreateInstance(out container);
-			if (result != .OK)
-				return;
-
-			result = container.VT.Load(container, pBlob);
-			if (result != .OK)
-				return;
-
-			result = container.VT.GetPartCount(container, let pPartCount);
-			if (result != .OK)
-				return;
-
-			uint32 partCount = pPartCount;
-
-			for (int i = 0; i < partCount; i++)
-			{
-				result = container.VT.GetPartKind(container, (.)i, var pPartKind);
-				Console.WriteLine($"Part kind: {pPartKind}");
-			}
-
-			IDxcCompilerArgs* compilerArgs = null;
-
-			Dxc.CreateInstance(out compilerArgs);
-
-			Console.WriteLine(compilerArgs.VT.GetCount(compilerArgs));
-
-			var arg1 = scope String("arg1").ToScopedNativeWChar!();
-
-			compilerArgs.VT.AddArguments(compilerArgs, &arg1, 1);
-
-			int count = compilerArgs.VT.GetCount(compilerArgs);
-			Console.WriteLine(count);
-
-			char16** v = compilerArgs.VT.GetArguments(compilerArgs);
-
-			for (int i = 0; i < count; i++)
-			{
-				Console.WriteLine($"{scope String(v[i])}");
-			}
-
-			IDxcPdbUtils* pdbUtils = null;
-
-			Dxc.CreateInstance(out pdbUtils);
-
-			result = pdbUtils.VT.Load(pdbUtils, pBlob);
-			if (result != .OK)
-				return;
-
-			/*
-			IDxcResult* compileResult = null;
-
-			result = pdbUtils.VT.CompileForFullPDB(pdbUtils, out compileResult);
-			if(result != .OK)
-				return;*/
-
-			result = pdbUtils.VT.GetSourceCount(pdbUtils, var pSourceCount);
-			if (result != .OK)
-				return;
-
-			result = pdbUtils.VT.GetArgCount(pdbUtils, var pArgCount);
-			if (result != .OK)
-				return;
-
-			result = pdbUtils.VT.GetName(pdbUtils, var name);
-			if (result != .OK)
-				return;
-
-			IDxcBlob* fullPdbBlob = null;
-
-			result = pdbUtils.VT.GetFullPDB(pdbUtils, out fullPdbBlob);
-			if (result != .OK)
-				return;
-		}
-
 		public static void Main(String[] args)
 		{
 			IDxcLibrary* pLibrary = null;
@@ -142,8 +48,8 @@ namespace Dxc_Beef.Test
 
 			DxcBuffer buffer = .()
 				{
-					Ptr = pSource.VT.GetBufferPointer(pSource),
-					Size = pSource.VT.GetBufferSize(pSource),
+					Ptr = pSource.GetBufferPointer(),
+					Size = pSource.GetBufferSize(),
 					Encoding = 0
 				};
 
@@ -155,28 +61,28 @@ namespace Dxc_Beef.Test
 
 			IDxcResult* pResult = (.)ppResult;
 
-			result = pResult.VT.GetStatus(pResult, var status);
+			result = pResult.GetStatus(var status);
 
 			if (status != .OK)
 			{
 				IDxcBlobEncoding* pErrors = null;
-				result = pResult.VT.GetErrorBuffer(pResult, out pErrors);
-				if (pErrors != null && pErrors.VT.GetBufferSize(pErrors) > 0)
+				result = pResult.GetErrorBuffer(out pErrors);
+				if (pErrors != null && pErrors.GetBufferSize() > 0)
 				{
-					Debug.WriteLine(scope String((char8*)pErrors.VT.GetBufferPointer(pErrors)));
+					Debug.WriteLine(scope String((char8*)pErrors.GetBufferPointer()));
 				}
 				return;
 			}
 
 			IDxcBlob* pBlob = null;
 
-			result = pResult.VT.GetResult(pResult, out pBlob);
+			result = pResult.GetResult(out pBlob);
 			if (result != .OK)
 				return;
 
 			List<uint8> data = scope .();
 
-			data.AddRange(Span<uint8>((uint8*)pBlob.VT.GetBufferPointer(pBlob), pBlob.VT.GetBufferSize(pBlob)));
+			data.AddRange(Span<uint8>((.)pBlob.GetBufferPointer(), pBlob.GetBufferSize()));
 
 			String outputFile = Path.InternalCombine(.. scope .(), shadersPath, "cache", "compiled_shader.dxil");
 
@@ -185,6 +91,10 @@ namespace Dxc_Beef.Test
 				Debug.WriteLine($"Failed to write compiled shader.");
 				return;
 			}
+
+			Console.WriteLine("Shader compilation successful.\nOutput file: {0}\n", outputFile);
+
+			Console.WriteLine("Press [Enter] to exit.");
 
 			Console.Read();
 		}
