@@ -112,24 +112,27 @@ namespace Dxc_Beef.Test
 
 			uint32 codePage = 0;
 
-			result = pLibrary.VT.CreateBlobFromFile(pLibrary, scope String("shader.hlsl").ToScopedNativeWChar!(), &codePage, out pSource);
+			String shadersPath = Path.InternalCombine(.. scope .(), Directory.GetCurrentDirectory(.. scope String()), "shaders");
+
+			result = pLibrary.VT.CreateBlobFromFile(pLibrary, Path.InternalCombine(.. scope .(), shadersPath, "shader.hlsl").ToScopedNativeWChar!(), &codePage, out pSource);
 			if (result != .OK)
 				return;
 
 			List<char16*> arguments = scope .();
+			{
+				arguments.Add(scope String("-E").ToScopedNativeWChar!::());
+				arguments.Add(scope String("PSMain").ToScopedNativeWChar!::());
 
-			arguments.Add(scope String("-E").ToScopedNativeWChar!());
-			arguments.Add(scope String("PSMain").ToScopedNativeWChar!());
+				arguments.Add(scope String("-T").ToScopedNativeWChar!::());
+				arguments.Add(scope String("ps_6_2").ToScopedNativeWChar!::());
 
-			arguments.Add(scope String("-T").ToScopedNativeWChar!());
-			arguments.Add(scope String("ps_6_2").ToScopedNativeWChar!());
+				arguments.Add(scope String("-Qstrip_debug").ToScopedNativeWChar!::());
+				arguments.Add(scope String("-Qstrip_reflect").ToScopedNativeWChar!::());
 
-			arguments.Add(scope String("-Qstrip_debug").ToScopedNativeWChar!());
-			arguments.Add(scope String("-Qstrip_reflect").ToScopedNativeWChar!());
-
-			arguments.Add(DXC_ARG_WARNINGS_ARE_ERRORS.ToScopedNativeWChar!());
-			arguments.Add(DXC_ARG_DEBUG.ToScopedNativeWChar!());
-			arguments.Add(DXC_ARG_PACK_MATRIX_ROW_MAJOR.ToScopedNativeWChar!());
+				arguments.Add(DXC_ARG_WARNINGS_ARE_ERRORS.ToScopedNativeWChar!::());
+				arguments.Add(DXC_ARG_DEBUG.ToScopedNativeWChar!::());
+				arguments.Add(DXC_ARG_PACK_MATRIX_ROW_MAJOR.ToScopedNativeWChar!::());
+			}
 
 			IDxcCompiler3* pCompiler = null;
 
@@ -144,7 +147,7 @@ namespace Dxc_Beef.Test
 					Encoding = 0
 				};
 
-			MyIncludeHandler includeHandler = .(pLibrary, Directory.GetCurrentDirectory(.. scope String()));
+			IncludeHandler includeHandler = .(pLibrary, shadersPath);
 
 			result = pCompiler.VT.Compile(pCompiler, &buffer, arguments.Ptr, (.)arguments.Count, &includeHandler, ref IDxcResult.sIID, var ppResult);
 			if (result != .OK)
@@ -165,78 +168,25 @@ namespace Dxc_Beef.Test
 				return;
 			}
 
+			IDxcBlob* pBlob = null;
+
+			result = pResult.VT.GetResult(pResult, out pBlob);
+			if (result != .OK)
+				return;
+
+			List<uint8> data = scope .();
+
+			data.AddRange(Span<uint8>((uint8*)pBlob.VT.GetBufferPointer(pBlob), pBlob.VT.GetBufferSize(pBlob)));
+
+			String outputFile = Path.InternalCombine(.. scope .(), shadersPath, "cache", "compiled_shader.dxil");
+
+			if (File.WriteAll(outputFile, data) case .Err)
+			{
+				Debug.WriteLine($"Failed to write compiled shader.");
+				return;
+			}
+
 			Console.Read();
 		}
-	}
-
-	public struct MyIncludeHandler : IDxcIncludeHandler
-	{
-		public struct VTable : Windows.COM_IUnknown.VTable
-		{
-			public function [CallingConvention(.Stdcall)] HResult(MyIncludeHandler* this, char16* pFilename, out IDxcBlob* ppIncludeSource) LoadSource;
-		}
-
-		public this(IDxcLibrary* pLibrary, in String basePath)
-		{
-			m_pLibrary = pLibrary;
-			m_BasePath = basePath;
-
-			function [CallingConvention(.Stdcall)] HResult(MyIncludeHandler* this, ref Guid riid, void** result) queryInterface = => QueryInterface;
-			function [CallingConvention(.Stdcall)] uint32(MyIncludeHandler* this) addRef = => AddRef;
-			function [CallingConvention(.Stdcall)] uint32(MyIncludeHandler* this) release = => Release;
-
-			mDVT = .();
-			mDVT.QueryInterface = (.)(void*)queryInterface;
-			mDVT.AddRef = (.)(void*)addRef;
-			mDVT.Release = (.)(void*)release;
-			mDVT.LoadSource = => LoadSource;
-
-			mVT = &mDVT;
-		}
-
-		private HResult LoadSource(char16* pFilename, out IDxcBlob* ppIncludeSource)
-		{
-			IDxcBlobEncoding* pSource = null;
-
-			String path = scope String(m_BasePath);
-			path.AppendF("{0}{1}", Path.DirectorySeparatorChar, scope String(pFilename));
-
-			HResult result = m_pLibrary.VT.CreateBlobFromFile(m_pLibrary, path.ToScopedNativeWChar!(), null, out pSource);
-
-			if (result == .OK && pSource != null)
-				ppIncludeSource = pSource;
-			else
-				ppIncludeSource = ?;
-
-			return result;
-		}
-
-		private HResult QueryInterface(ref Guid riid, void** result)
-		{
-			return (.)0x80004001;
-		}
-
-		private uint32 AddRef()
-		{
-			return (.)0x80004001;
-		}
-
-		private uint32 Release()
-		{
-			return (.)0x80004001;
-		}
-
-
-		public new VTable* VT
-		{
-			get
-			{
-				return (.)mVT;
-			}
-		}
-
-		private VTable mDVT;
-		private IDxcLibrary* m_pLibrary = null;
-		private String m_BasePath = null;
 	}
 }
