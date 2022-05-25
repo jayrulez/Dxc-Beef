@@ -20,7 +20,7 @@ namespace Dxc_Beef.Test
 
 			String shadersPath = Path.InternalCombine(.. scope .(), Directory.GetCurrentDirectory(.. scope String()), "shaders");
 
-			result = pLibrary.VT.CreateBlobFromFile(pLibrary, Path.InternalCombine(.. scope .(), shadersPath, "shader.hlsl").ToScopedNativeWChar!(), &codePage, out pSource);
+			result = pLibrary.CreateBlobFromFile(Path.InternalCombine(.. scope .(), shadersPath, "shader.hlsl"), &codePage, out pSource);
 			if (result != .OK)
 				return;
 

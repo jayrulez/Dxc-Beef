@@ -29,7 +29,7 @@ namespace Dxc_Beef.Test
 
 			String path = Path.InternalCombine(.. scope .(), m_BasePath, scope String(pFilename));
 
-			HResult result = m_pLibrary.VT.CreateBlobFromFile(m_pLibrary, path.ToScopedNativeWChar!(), null, out pSource);
+			HResult result = m_pLibrary.CreateBlobFromFile(path, null, out pSource);
 
 			if (result == .OK && pSource != null)
 				ppIncludeSource = pSource;

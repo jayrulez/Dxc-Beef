@@ -9,18 +9,24 @@ namespace Dxc_Beef
 		public struct VTable : COM_Resource.VTable
 		{
 			// Assemble dxil in ll or llvm bitcode to DXIL container.
-			public function [CallingConvention(.Stdcall)] HResult(IDxcAssembler * self,
-				IDxcBlob *pShader,                       // Shader to assemble.
-				out IDxcOperationResult *ppResult   // Assembly output status, buffer, and errors
+			public function [CallingConvention(.Stdcall)] HResult(
+				IDxcAssembler* self,
+				IDxcBlob* pShader, // Shader to assemble.
+				out IDxcOperationResult* ppResult // Assembly output status, buffer, and errors
 				) AssembleToContainer;
 		}
 
-		public new VTable* VT
+		private new VTable* VT
 		{
 			get
 			{
 				return (.)mVT;
 			}
+		}
+
+		public HResult AssembleToContainer(IDxcBlob* pShader, out IDxcOperationResult* ppResult) mut
+		{
+			return VT.AssembleToContainer(&this, pShader, out ppResult);
 		}
 	}
 }
