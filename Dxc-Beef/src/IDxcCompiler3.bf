@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 namespace Dxc_Beef
 {
 	public struct IDxcCompiler3 : COM_Resource
@@ -17,22 +18,51 @@ namespace Dxc_Beef
 				char16** pArguments, // Array of pointers to arguments
 				uint32 argCount, // Number of arguments
 				IDxcIncludeHandler* pIncludeHandler, // user-provided interface to handle #include directives (optional)
-				ref Guid riid, out void** ppResult // IDxcResult: status, buffer, and errors
+			ref Guid riid, out void** ppResult // IDxcResult: status, buffer, and errors
 				) Compile;
 
 			// Disassemble a program.
 			public function [CallingConvention(.Stdcall)] HResult(IDxcCompiler3* self,
 				DxcBuffer* pObject, // Program to disassemble: dxil container or bitcode.
-				ref Guid riid, out void** ppResult // IDxcResult: status, disassembly text, and errors
+			ref Guid riid, out void** ppResult // IDxcResult: status, disassembly text, and errors
 				) Disassemble;
 		}
 
-		public new VTable* VT
+		private new VTable* VT
 		{
 			get
 			{
 				return (.)mVT;
 			}
+		}
+
+		public HResult Compile(
+			DxcBuffer* pSource, // Source text to compile
+			Span<StringView> arguments,
+			IDxcIncludeHandler* pIncludeHandler, // user-provided interface to handle #include directives (optional)
+			ref Guid riid,
+			out void** ppResult // IDxcResult: status, buffer, and errors
+			) mut
+		{
+			List<char16*> parguments = scope .()
+				{
+					Count = arguments.Length
+				};
+			for (int i = 0; i < arguments.Length; i++)
+			{
+				parguments[i] = arguments[i].ToScopedNativeWChar!::();
+			}
+
+			return VT.Compile(&this, pSource, parguments.Ptr, (.)parguments.Count, pIncludeHandler, ref riid, out ppResult);
+		}
+
+		public HResult Disassemble(
+			DxcBuffer* pObject, // Program to disassemble: dxil container or bitcode.
+			ref Guid riid,
+			out void** ppResult // IDxcResult: status, disassembly text, and errors
+			) mut
+		{
+			return VT.Disassemble(&this, pObject, ref riid, out ppResult);
 		}
 	}
 }

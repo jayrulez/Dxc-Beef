@@ -64,7 +64,7 @@ namespace Dxc_Beef
 			) mut => VT.CreateBlobFromBlob(&this, pBlob, offset, length, out ppResult);
 
 		public HResult CreateBlobFromFile(
-			String pFileName,
+			StringView pFileName,
 			uint32* codePage,
 			out IDxcBlobEncoding* pBlobEncoding
 			) mut => VT.CreateBlobFromFile(&this, pFileName.ToScopedNativeWChar!(), codePage, out pBlobEncoding);

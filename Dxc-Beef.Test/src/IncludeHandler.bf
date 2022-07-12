@@ -9,10 +9,10 @@ namespace Dxc_Beef.Test
 			m_pLibrary = pLibrary;
 			m_BasePath = basePath;
 
-			function [CallingConvention(.Stdcall)] HResult(IncludeHandler* this, ref Guid riid, void** result) queryInterface = => QueryInterface;
-			function [CallingConvention(.Stdcall)] uint32(IncludeHandler* this) addRef = => AddRef;
-			function [CallingConvention(.Stdcall)] uint32(IncludeHandler* this) release = => Release;
-			function [CallingConvention(.Stdcall)] HResult(IncludeHandler* this, char16* pFilename, out IDxcBlob* ppIncludeSource) loadSource = => LoadSource;
+			function [CallingConvention(.Stdcall)] HResult(IncludeHandler* this, ref Guid riid, void** result) queryInterface = => InternalQueryInterface;
+			function [CallingConvention(.Stdcall)] uint32(IncludeHandler* this) addRef = => InternalAddRef;
+			function [CallingConvention(.Stdcall)] uint32(IncludeHandler* this) release = => InternalRelease;
+			function [CallingConvention(.Stdcall)] HResult(IncludeHandler* this, char16* pFilename, out IDxcBlob* ppIncludeSource) loadSource = => InternalLoadSource;
 
 			mDVT = .();
 			mDVT.QueryInterface = (.)(void*)queryInterface;
@@ -23,7 +23,7 @@ namespace Dxc_Beef.Test
 			mVT = &mDVT;
 		}
 
-		private HResult LoadSource(char16* pFilename, out IDxcBlob* ppIncludeSource)
+		private HResult InternalLoadSource(char16* pFilename, out IDxcBlob* ppIncludeSource)
 		{
 			IDxcBlobEncoding* pSource = null;
 
@@ -39,23 +39,25 @@ namespace Dxc_Beef.Test
 			return result;
 		}
 
-		private HResult QueryInterface(ref Guid riid, void** result)
+		public new HResult LoadSource(in StringView pFilename, out IDxcBlob* ppIncludeSource)
+			=> InternalLoadSource(pFilename.ToScopedNativeWChar!(), out ppIncludeSource);
+
+		private HResult InternalQueryInterface(ref Guid riid, void** result)
 		{
 			return (.)0x80004001;
 		}
 
-		private uint32 AddRef()
+		private uint32 InternalAddRef()
 		{
 			return (.)0x80004001;
 		}
 
-		private uint32 Release()
+		private uint32 InternalRelease()
 		{
 			return (.)0x80004001;
 		}
 
-
-		public new VTable* VT
+		private new VTable* VT
 		{
 			get
 			{
@@ -67,5 +69,4 @@ namespace Dxc_Beef.Test
 		private IDxcLibrary* m_pLibrary = null;
 		private String m_BasePath = null;
 	}
-
 }
