@@ -1,20 +1,20 @@
 using System;
 namespace Dxc_Beef
 {
-	public struct IDxcLinker : COM_Resource
+	public struct IDxcLinker : IUnknown
 	{
-		public static new Guid sIID = .(0xF1B5BE2A, 0x62DD, 0x4327, 0xA1, 0xC2, 0x42, 0xAC, 0x1E, 0x1E, 0x78, 0xE6);
+		public static new Guid IID = .(0xF1B5BE2A, 0x62DD, 0x4327, 0xA1, 0xC2, 0x42, 0xAC, 0x1E, 0x1E, 0x78, 0xE6);
 		public static new Guid sCLSID = CLSID_DxcLinker;
 
-		public struct VTable : COM_Resource.VTable
+		public struct VTable : IUnknown.VTable
 		{
-			public function [CallingConvention(.Stdcall)] HResult (
+			public function [CallingConvention(.Stdcall)] HRESULT (
 				IDxcLinker* self,
 				char16* pLibName,          // Name of the library.
 				IDxcBlob *pLib                 // Library blob.
 				) RegisterLibrary;
 			
-			public function [CallingConvention(.Stdcall)] HResult (
+			public function [CallingConvention(.Stdcall)] HRESULT (
 				IDxcLinker* self,
 				char16* pEntryName,        // Entry point name
 				char16* pTargetProfile,        // shader profile to link

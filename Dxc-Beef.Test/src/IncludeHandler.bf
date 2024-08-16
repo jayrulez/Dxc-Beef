@@ -9,29 +9,29 @@ namespace Dxc_Beef.Test
 			m_pLibrary = pLibrary;
 			m_BasePath = basePath;
 
-			function [CallingConvention(.Stdcall)] HResult(IncludeHandler* this, ref Guid riid, void** result) queryInterface = => InternalQueryInterface;
+			function [CallingConvention(.Stdcall)] HRESULT(IncludeHandler* this, ref Guid riid, void** result) queryInterface = => InternalQueryInterface;
 			function [CallingConvention(.Stdcall)] uint32(IncludeHandler* this) addRef = => InternalAddRef;
 			function [CallingConvention(.Stdcall)] uint32(IncludeHandler* this) release = => InternalRelease;
-			function [CallingConvention(.Stdcall)] HResult(IncludeHandler* this, char16* pFilename, out IDxcBlob* ppIncludeSource) loadSource = => InternalLoadSource;
+			function [CallingConvention(.Stdcall)] HRESULT(IncludeHandler* this, char16* pFilename, out IDxcBlob* ppIncludeSource) loadSource = => InternalLoadSource;
 
 			mDVT = .();
-			mDVT.QueryInterface = (.)(void*)queryInterface;
-			mDVT.AddRef = (.)(void*)addRef;
-			mDVT.Release = (.)(void*)release;
+			mDVT.[Friend]QueryInterface = (.)(void*)queryInterface;
+			mDVT.[Friend]AddRef = (.)(void*)addRef;
+			mDVT.[Friend]Release = (.)(void*)release;
 			mDVT.LoadSource = (.)(void*)loadSource;
 
 			mVT = &mDVT;
 		}
 
-		private HResult InternalLoadSource(char16* pFilename, out IDxcBlob* ppIncludeSource)
+		private HRESULT InternalLoadSource(char16* pFilename, out IDxcBlob* ppIncludeSource)
 		{
 			IDxcBlobEncoding* pSource = null;
 
 			String path = Path.InternalCombine(.. scope .(), m_BasePath, scope String(pFilename));
 
-			HResult result = m_pLibrary.CreateBlobFromFile(path, null, out pSource);
+			HRESULT result = m_pLibrary.CreateBlobFromFile(path, null, out pSource);
 
-			if (result == .OK && pSource != null)
+			if (result == .S_OK && pSource != null)
 				ppIncludeSource = pSource;
 			else
 				ppIncludeSource = ?;
@@ -39,10 +39,10 @@ namespace Dxc_Beef.Test
 			return result;
 		}
 
-		public new HResult LoadSource(in StringView pFilename, out IDxcBlob* ppIncludeSource)
+		public new HRESULT LoadSource(in StringView pFilename, out IDxcBlob* ppIncludeSource)
 			=> InternalLoadSource(pFilename.ToScopedNativeWChar!(), out ppIncludeSource);
 
-		private HResult InternalQueryInterface(ref Guid riid, void** result)
+		private HRESULT InternalQueryInterface(ref Guid riid, void** result)
 		{
 			return (.)0x80004001;
 		}

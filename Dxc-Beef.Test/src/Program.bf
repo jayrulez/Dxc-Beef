@@ -11,7 +11,7 @@ class Program
 	{
 		IDxcLibrary* pLibrary = null;
 		var result = Dxc.CreateInstance(out pLibrary);
-		if (result != .OK)
+		if (result != .S_OK)
 			return;
 
 		IDxcBlobEncoding* pSource = null;
@@ -21,7 +21,7 @@ class Program
 		String shadersPath = Path.InternalCombine(.. scope .(), Directory.GetCurrentDirectory(.. scope String()), "shaders");
 
 		result = pLibrary.CreateBlobFromFile(Path.InternalCombine(.. scope .(), shadersPath, "shader.hlsl"), &codePage, out pSource);
-		if (result != .OK)
+		if (result != .S_OK)
 			return;
 
 		List<StringView> arguments = scope .();
@@ -43,27 +43,27 @@ class Program
 		IDxcCompiler3* pCompiler = null;
 
 		result = Dxc.CreateInstance(out pCompiler);
-		if (result != .OK)
+		if (result != .S_OK)
 			return;
 
 		DxcBuffer buffer = .()
 			{
 				Ptr = pSource.GetBufferPointer(),
-				Size = pSource.GetBufferSize(),
+				Size = (uint)pSource.GetBufferSize(),
 				Encoding = 0
 			};
 
 		IncludeHandler includeHandler = .(pLibrary, shadersPath);
 
 		result = pCompiler.Compile(&buffer, arguments, &includeHandler, ref IDxcResult.sIID, var ppResult);
-		if (result != .OK)
+		if (result != .S_OK)
 			return;
 
 		IDxcResult* pResult = (.)ppResult;
 
 		result = pResult.GetStatus(var status);
 
-		if (status != .OK)
+		if (status != .S_OK)
 		{
 			IDxcBlobEncoding* pErrors = null;
 			result = pResult.GetErrorBuffer(out pErrors);
@@ -77,12 +77,12 @@ class Program
 		IDxcBlob* pBlob = null;
 
 		result = pResult.GetResult(out pBlob);
-		if (result != .OK)
+		if (result != .S_OK)
 			return;
 
 		List<uint8> data = scope .();
 
-		data.AddRange(Span<uint8>((.)pBlob.GetBufferPointer(), pBlob.GetBufferSize()));
+		data.AddRange(Span<uint8>((.)pBlob.GetBufferPointer(), (int)pBlob.GetBufferSize()));
 
 		String outputFile = Path.InternalCombine(.. scope .(), shadersPath, "cache", "compiled_shader.dxil");
 

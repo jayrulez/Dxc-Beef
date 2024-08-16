@@ -1,18 +1,140 @@
 using System;
 namespace Dxc_Beef
 {
-	public struct COM_Resource : Windows.COM_IUnknown
+	enum HRESULT : int32
 	{
-		public static Guid sIID;
-		public static Guid sCLSID;
+		S_OK = 0,
+		S_FALSE = 1,
+	}
+
+	typealias PWSTR = char16*;
+
+	[CRepr]
+	public struct FILETIME
+	{
+		public uint32 dwLowDateTime;
+		public uint32 dwHighDateTime;
+	}
+
+	[AllowDuplicates]
+	public enum LOCKTYPE : int32
+	{
+		LOCK_WRITE = 1,
+		LOCK_EXCLUSIVE = 2,
+		LOCK_ONLYONCE = 4,
+	}
+
+	[AllowDuplicates]
+	public enum STGM : uint32
+	{
+		STGM_DIRECT = 0,
+		STGM_TRANSACTED = 65536,
+		STGM_SIMPLE = 134217728,
+		STGM_READ = 0,
+		STGM_WRITE = 1,
+		STGM_READWRITE = 2,
+		STGM_SHARE_DENY_NONE = 64,
+		STGM_SHARE_DENY_READ = 48,
+		STGM_SHARE_DENY_WRITE = 32,
+		STGM_SHARE_EXCLUSIVE = 16,
+		STGM_PRIORITY = 262144,
+		STGM_DELETEONRELEASE = 67108864,
+		STGM_NOSCRATCH = 1048576,
+		STGM_CREATE = 4096,
+		STGM_CONVERT = 131072,
+		STGM_FAILIFTHERE = 0,
+		STGM_NOSNAPSHOT = 2097152,
+		STGM_DIRECT_SWMR = 4194304,
+	}
+
+	[AllowDuplicates]
+	public enum STGC : uint32
+	{
+		STGC_DEFAULT = 0,
+		STGC_OVERWRITE = 1,
+		STGC_ONLYIFCURRENT = 2,
+		STGC_DANGEROUSLYCOMMITMERELYTODISKCACHE = 4,
+		STGC_CONSOLIDATE = 8,
+	}
+
+	[CRepr]
+	public struct STATSTG
+	{
+		public PWSTR pwcsName;
+		public uint32 type;
+		public ULARGE_INTEGER cbSize;
+		public FILETIME mtime;
+		public FILETIME ctime;
+		public FILETIME atime;
+		public STGM grfMode;
+		public LOCKTYPE grfLocksSupported;
+		public Guid clsid;
+		public uint32 grfStateBits;
+		public uint32 reserved;
+	}
+
+	[AllowDuplicates]
+	public enum STATFLAG : int32
+	{
+		STATFLAG_DEFAULT = 0,
+		STATFLAG_NONAME = 1,
+		STATFLAG_NOOPEN = 2,
+	}
+
+	[AllowDuplicates]
+	public enum STREAM_SEEK : uint32
+	{
+		STREAM_SEEK_SET = 0,
+		STREAM_SEEK_CUR = 1,
+		STREAM_SEEK_END = 2,
+	}
+
+	[CRepr, Union]
+	public struct LARGE_INTEGER
+	{
+		[CRepr]
+		public struct _u_e__Struct
+		{
+			public uint32 LowPart;
+			public int32 HighPart;
+		}
+		[CRepr]
+		public struct _Anonymous_e__Struct
+		{
+			public uint32 LowPart;
+			public int32 HighPart;
+		}
+		public using _Anonymous_e__Struct Anonymous;
+		public _u_e__Struct u;
+		public int64 QuadPart;
+	}
+
+	[CRepr, Union]
+	public struct ULARGE_INTEGER
+	{
+		[CRepr]
+		public struct _u_e__Struct
+		{
+			public uint32 LowPart;
+			public uint32 HighPart;
+		}
+		[CRepr]
+		public struct _Anonymous_e__Struct
+		{
+			public uint32 LowPart;
+			public uint32 HighPart;
+		}
+		public using _Anonymous_e__Struct Anonymous;
+		public _u_e__Struct u;
+		public uint64 QuadPart;
 	}
 
 	[CRepr]
 	struct DxcBuffer
 	{
 		public void* Ptr;
-		public int Size;
-		public uint Encoding;
+		public uint Size;
+		public uint32 Encoding;
 	}
 
 	typealias DxcText = DxcBuffer;

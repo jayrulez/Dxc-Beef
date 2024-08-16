@@ -4,16 +4,16 @@ namespace Dxc_Beef
 {
 	public static class Dxc
 	{
-		private static function Windows.COM_IUnknown.HResult(
-			ref Guid rclsid,
-			ref Guid riid,
+		private static function HRESULT(
+			in Guid rclsid,
+			in Guid riid,
 			out void* ppv
 			) DxcCreateInstanceProc = => DxcCreateInstance;
 
-		private static function Windows.COM_IUnknown.HResult(
+		private static function HRESULT(
 			in IMalloc* pMalloc,
-			ref Guid rclsid,
-			ref Guid riid,
+			in Guid rclsid,
+			in Guid riid,
 			out void* ppv
 			) DxcCreateInstance2Proc = => DxcCreateInstance2;
 
@@ -36,23 +36,23 @@ namespace Dxc_Beef
 		/// </remarks>
 
 		[CallingConvention(.Stdcall), CLink, Import("dxcompiler.lib")]
-		private static extern Windows.COM_IUnknown.HResult DxcCreateInstance(
-			ref Guid rclsid,
-			ref Guid riid,
+		private static extern HRESULT DxcCreateInstance(
+			in Guid rclsid,
+			in Guid riid,
 			out void* ppv);
 
 		[CallingConvention(.Stdcall), CLink, Import("dxcompiler.lib")]
-		private static extern Windows.COM_IUnknown.HResult DxcCreateInstance2(
+		private static extern HRESULT DxcCreateInstance2(
 			in IMalloc* pMalloc,
-			ref Guid rclsid,
-			ref Guid riid,
+			in Guid rclsid,
+			in Guid riid,
 			out void* ppv);
 
-		public static Windows.COM_IUnknown.HResult CreateInstance<T>(out T* ppv) where T : COM_Resource
+		public static HRESULT CreateInstance<T>(out T* ppv) where T : IUnknown, var
 		{
 			void* ptr = null;
 			//Console.WriteLine($"CLSID:{T.sCLSID.GetString(.. scope .())}, IID:{T.sIID.GetString(.. scope .())}");
-			var result = DxcCreateInstance(ref T.sCLSID, ref T.sIID, out ptr);
+			var result = DxcCreateInstance(T.sCLSID, T.IID, out ptr);
 
 			ppv = (.)ptr;
 
@@ -61,7 +61,7 @@ namespace Dxc_Beef
 	}
 
 	/*
-	public struct DxcDiaDataSource : Windows.COM_IUnknown
+	public struct DxcDiaDataSource : IUnknown
 	{
 		public static Guid sCLSID = CLSID_DxcDiaDataSource;
 	}
